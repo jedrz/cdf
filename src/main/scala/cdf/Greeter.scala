@@ -8,7 +8,7 @@ object Greeter {
 }
 
 class Greeter extends Actor {
-  def receive = {
+  def receive: PartialFunction[Any, Unit] = {
     case Greeter.Greet =>
       println("Hello World!")
       sender() ! Greeter.Done

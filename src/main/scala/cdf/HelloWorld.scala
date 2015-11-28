@@ -12,7 +12,7 @@ class HelloWorld extends Actor {
     greeter ! Greeter.Greet
   }
 
-  def receive = {
+  def receive: PartialFunction[Any, Unit] = {
     // when the greeter is done, stop this actor and with it the application
     case Greeter.Done => context.stop(self)
   }
