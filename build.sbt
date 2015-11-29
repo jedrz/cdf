@@ -10,3 +10,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
   "org.scalatest" % "scalatest_2.11" % "2.2.5" % "test"
 )
+
+lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value
+(test in Test) <<= (test in Test) dependsOn testScalastyle
