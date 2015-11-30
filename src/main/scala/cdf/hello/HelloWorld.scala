@@ -8,9 +8,18 @@ object HelloWorld {
   }
 }
 
-class HelloWorld(val greeter: ActorRef) extends Actor {
+class HelloWorld(val greeterOption: Option[ActorRef]) extends Actor {
+
+  def this() = {
+    this(None)
+  }
+
+  def this(greeter: ActorRef) {
+    this(Some(greeter))
+  }
 
   override def preStart(): Unit = {
+    val greeter = greeterOption getOrElse context.actorOf(Props[Greeter])
     greeter ! Greeter.Greet
   }
 
