@@ -1,8 +1,6 @@
-package cdf
+package cdf.hello
 
-import cdf.hello.HelloWorld
-
-object Main {
+object HelloMain {
 
   def main(args: Array[String]): Unit = {
     akka.Main.main(Array(classOf[HelloWorld].getName))
