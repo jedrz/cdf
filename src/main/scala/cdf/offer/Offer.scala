@@ -1,4 +1,6 @@
 package cdf.offer
 
-// TODO: add more
-case class Offer(title: String, url: String, price: BigDecimal)
+case class Offer(title: String,
+                 url: String,
+                 price: BigDecimal,
+                 author: String = "")

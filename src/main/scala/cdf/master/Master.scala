@@ -1,7 +1,9 @@
 package cdf.master
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import cdf.finder.{Finder, SimpleFinder}
+import cdf.finder.Finder
+import cdf.finder.aros.ArosFinder
+import cdf.finder.download.Downloader
 import cdf.matcher.Matcher
 import cdf.offer.Offer
 
@@ -34,6 +36,7 @@ class Master(val query: String) extends Actor with ActorLogging {
 }
 
 class DefaultMaster(query: String) extends Master(query) with MasterComponent {
-  override val finder = context.actorOf(SimpleFinder.props, "finder")
+  val downloader = context.actorOf(Downloader.props)
+  override val finder = context.actorOf(ArosFinder.props(downloader), "arosFinder")
   override val matcher = context.actorOf(Matcher.props, "matcher")
 }
