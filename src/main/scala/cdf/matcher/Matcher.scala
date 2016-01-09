@@ -1,8 +1,7 @@
 package cdf.matcher
 
-import akka.actor.{Props, Actor}
-import akka.actor.Actor.Receive
-import cdf.master.Master
+import akka.actor.{Actor, Props}
+import cdf.master.Coordinator
 import cdf.offer.Offer
 
 object Matcher {
@@ -17,6 +16,6 @@ class Matcher extends Actor {
   override def receive: Receive = {
     case Matcher.Match(offers) =>
       val groups = offers.grouped(1).toList
-      sender ! Master.MatchResult(groups)
+      sender ! Coordinator.MatchResult(groups)
   }
 }

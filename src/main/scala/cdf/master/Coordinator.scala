@@ -7,22 +7,22 @@ import cdf.finder.{Finder, SimpleFinder}
 import cdf.matcher.Matcher
 import cdf.offer.Offer
 
-object Master {
+object Coordinator {
   case class Offers(list: List[Offer])
   case class MatchResult(groups: List[List[Offer]])
 
   def props(query: String): Props = {
-    Props(classOf[DefaultMaster], query)
+    Props(classOf[DefaultCoordinator], query)
   }
 }
 
-trait MasterComponent {
+trait CoordinatorComponent {
   val finders: Vector[ActorRef]
   val matcher: ActorRef
 }
 
-class Master(val query: String) extends Actor with ActorLogging {
-  this: MasterComponent =>
+class Coordinator(val query: String) extends Actor with ActorLogging {
+  this: CoordinatorComponent =>
 
   var receivedOffers: Vector[List[Offer]] = Vector.empty
 
@@ -31,17 +31,17 @@ class Master(val query: String) extends Actor with ActorLogging {
   }
 
   override def receive: Receive = {
-    case Master.Offers(offers) =>
+    case Coordinator.Offers(offers) =>
       log.info("Received offers {}", offers)
       receivedOffers = receivedOffers :+ offers
       if (receivedOffers.size == finders.size) {
         matcher ! Matcher.Match(receivedOffers.flatten.toList)
       }
-    case matchResult: Master.MatchResult => log.info("Match result {}", matchResult)
+    case matchResult: Coordinator.MatchResult => log.info("Match result {}", matchResult)
   }
 }
 
-class DefaultMaster(query: String) extends Master(query) with MasterComponent {
+class DefaultCoordinator(query: String) extends Coordinator(query) with CoordinatorComponent {
   val downloader = context.actorOf(Downloader.props, "downloader")
   override val finders = Vector(
     context.actorOf(SimpleFinder.props, "simpleFinder"),

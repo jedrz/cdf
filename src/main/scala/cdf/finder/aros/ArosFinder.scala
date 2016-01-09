@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import cdf.finder.Finder
 import cdf.finder.download.Downloader
-import cdf.master.Master
+import cdf.master.Coordinator
 import cdf.offer.Offer
 
 object ArosFinder {
@@ -51,7 +51,7 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
       val newIds = ids - id
       val newOffers = arosUtil.parseToOffer(source, idToLinkMap(id)) :: offers
       if (newIds.isEmpty) {
-        replyToWithOffers ! Master.Offers(newOffers)
+        replyToWithOffers ! Coordinator.Offers(newOffers)
         // This is optional since we assume for now that only one search request is allowed.
         context become receive
       } else {
