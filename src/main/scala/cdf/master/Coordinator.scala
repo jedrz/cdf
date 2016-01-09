@@ -23,19 +23,27 @@ trait CoordinatorComponent {
 class Coordinator(val query: String, replyTo: ActorRef) extends Actor with ActorLogging {
   this: CoordinatorComponent =>
 
-  var receivedOffers: Vector[List[Offer]] = Vector.empty
-
   override def preStart(): Unit = {
     finders.foreach(_ ! Finder.Find(query))
   }
 
   override def receive: Receive = {
+    waitingForOffers(Vector.empty)
+  }
+
+  def waitingForOffers(receivedOffers: Vector[List[Offer]]): Receive = {
     case Coordinator.Offers(offers) =>
       log.info("Received offers {}", offers)
-      receivedOffers = receivedOffers :+ offers
-      if (receivedOffers.size == finders.size) {
-        matcher ! Matcher.Match(receivedOffers.flatten.toList)
+      val newReceivedOffers = receivedOffers :+ offers
+      if (newReceivedOffers.size == finders.size) {
+        matcher ! Matcher.Match(newReceivedOffers.flatten.toList)
+        context become waitingForMatchResult
+      } else {
+        context become waitingForOffers(newReceivedOffers)
       }
+  }
+
+  def waitingForMatchResult: Receive = {
     case matchResult: Coordinator.MatchResult =>
       replyTo ! matchResult
       context.stop(self)
