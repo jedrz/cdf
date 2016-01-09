@@ -27,7 +27,7 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
     case Finder.Find(query) =>
       log.info("Received {} query to search in aros", query)
       val queryUrl = arosUtil.createSearchQuery(query)
-      downloader ! Downloader.Download(seqNumber.incrementAndGet(), queryUrl)
+      downloader ! Downloader.Download(seqNumber.incrementAndGet, queryUrl)
       context become waitingForSearchResults(sender)
   }
 
@@ -35,7 +35,7 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
     case Downloader.DownloadResult(_, source) =>
       val linksToBooks = arosUtil.parseSearchResults(source)
       log.info("Found {} links to books", linksToBooks)
-      val idToLinkMap = linksToBooks.map((seqNumber.incrementAndGet(), _)).toMap
+      val idToLinkMap = linksToBooks.map((seqNumber.incrementAndGet, _)).toMap
       idToLinkMap foreach {
         case (id, link) =>
           downloader ! Downloader.Download(id, link)
