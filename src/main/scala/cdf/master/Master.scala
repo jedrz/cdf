@@ -1,9 +1,9 @@
 package cdf.master
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import cdf.finder.Finder
 import cdf.finder.aros.ArosFinder
 import cdf.finder.download.Downloader
+import cdf.finder.{Finder, SimpleFinder}
 import cdf.matcher.Matcher
 import cdf.offer.Offer
 
@@ -17,28 +17,35 @@ object Master {
 }
 
 trait MasterComponent {
-  // TODO: it should be a list of finders
-  val finder: ActorRef
+  val finders: Vector[ActorRef]
   val matcher: ActorRef
 }
 
 class Master(val query: String) extends Actor with ActorLogging {
   this: MasterComponent =>
 
+  var receivedOffers: Vector[List[Offer]] = Vector.empty
+
   override def preStart(): Unit = {
-    finder ! Finder.Find(query)
+    finders.foreach(_ ! Finder.Find(query))
   }
 
   override def receive: Receive = {
-    case offers: Master.Offers =>
+    case Master.Offers(offers) =>
       log.info("Received offers {}", offers)
-      matcher ! Matcher.Match(offers.list)
+      receivedOffers = receivedOffers :+ offers
+      if (receivedOffers.size == finders.size) {
+        matcher ! Matcher.Match(receivedOffers.flatten.toList)
+      }
     case matchResult: Master.MatchResult => log.info("Match result {}", matchResult)
   }
 }
 
 class DefaultMaster(query: String) extends Master(query) with MasterComponent {
   val downloader = context.actorOf(Downloader.props, "downloader")
-  override val finder = context.actorOf(ArosFinder.props(downloader), "arosFinder")
+  override val finders = Vector(
+    context.actorOf(SimpleFinder.props, "simpleFinder"),
+    context.actorOf(ArosFinder.props(downloader), "arosFinder")
+  )
   override val matcher = context.actorOf(Matcher.props, "matcher")
 }
