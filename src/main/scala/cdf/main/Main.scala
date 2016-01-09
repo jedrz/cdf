@@ -8,5 +8,7 @@ object Main {
     val system = ActorSystem()
     val master = system.actorOf(Master.props, "master")
     master ! Master.Query("ubik")
+    master ! Master.Query("nocny patrol")
+    master ! Master.Query("pustynna włócznia")
   }
 }

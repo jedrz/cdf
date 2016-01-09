@@ -9,6 +9,8 @@ import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL._
 import org.jsoup.nodes.Element
 
+import scala.util.Try
+
 class ArosUtil {
   private val browser = new Browser
 
@@ -36,20 +38,22 @@ class ArosUtil {
     linksToBooks
   }
 
-  def parseToOffer(source: String, url: String): Offer = {
-    val document = browser.parseString(source)
-    val title = document >> text(titleSelector)
-    val author = (document >> element("td:containsOwn(Autor:)")).parent() >> text("td:eq(1) a b")
-    val beforeAndWithDecimalPoint = document >> text(beforeAndWithDecimalPointSelector)
-    val afterDecimalPoint = document >> text(afterDecimalPointSelector)
-    val price = NumberFormat.getInstance(Locale.forLanguageTag("PL"))
-      .parse(beforeAndWithDecimalPoint + afterDecimalPoint)
-      .toString
-    Offer(
-      title = title,
-      url = url,
-      price = BigDecimal(price),
-      author = author
-    )
+  def parseToOffer(source: String, url: String): Try[Offer] = {
+    Try {
+      val document = browser.parseString(source)
+      val title = document >> text(titleSelector)
+      val author = (document >> element("td:containsOwn(Autor:)")).parent() >> text("td:eq(1) a b")
+      val beforeAndWithDecimalPoint = document >> text(beforeAndWithDecimalPointSelector)
+      val afterDecimalPoint = document >> text(afterDecimalPointSelector)
+      val price = NumberFormat.getInstance(Locale.forLanguageTag("PL"))
+        .parse(beforeAndWithDecimalPoint + afterDecimalPoint)
+        .toString
+      Offer(
+        title = title,
+        url = url,
+        price = BigDecimal(price),
+        author = author
+      )
+    }
   }
 }

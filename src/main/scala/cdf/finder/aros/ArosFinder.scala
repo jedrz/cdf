@@ -8,6 +8,8 @@ import cdf.finder.download.Downloader
 import cdf.master.Coordinator
 import cdf.offer.Offer
 
+import scala.util.{Failure, Success}
+
 object ArosFinder {
   def props(downloader: ActorRef): Props = {
     Props(classOf[DefaultArosFinder], downloader)
@@ -49,7 +51,8 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
                        offers: List[Offer] = Nil): Receive = {
     case Downloader.DownloadResult(id, source) =>
       val newIds = ids - id
-      val newOffers = arosUtil.parseToOffer(source, idToLinkMap(id)) :: offers
+      val url = idToLinkMap(id)
+      val newOffers = parseOfferAndAdd(offers, source, url)
       if (newIds.isEmpty) {
         replyToWithOffers ! Coordinator.Offers(newOffers)
         // This is optional since we assume for now that only one search request is allowed.
@@ -57,6 +60,17 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
       } else {
         context become collectingOffers(replyToWithOffers, newIds, idToLinkMap, newOffers)
       }
+  }
+
+  private def parseOfferAndAdd(offers: List[Offer], source: String, url: String): List[Offer] = {
+    val offerTry = arosUtil.parseToOffer(source, url)
+    val newOffers = offerTry match {
+      case Success(offer) => offer :: offers
+      case Failure(exception) =>
+        log.error(exception, "Parsing offer {} failed", url)
+        offers
+    }
+    newOffers
   }
 }
 
