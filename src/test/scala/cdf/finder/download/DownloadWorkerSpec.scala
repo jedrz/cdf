@@ -2,6 +2,8 @@ package cdf.finder.download
 
 import cdf.ActorSpec
 
+import scala.concurrent.duration._
+
 class DownloadWorkerSpec extends ActorSpec(classOf[DownloadWorkerSpec]) {
   val downloadWorker = system.actorOf(DownloadWorker.props)
 
@@ -12,7 +14,7 @@ class DownloadWorkerSpec extends ActorSpec(classOf[DownloadWorkerSpec]) {
 
     downloadWorker ! Downloader.Download(id, url)
 
-    expectMsgPF() {
+    expectMsgPF(20.seconds) {
       case Downloader.DownloadResult(receivedId, source) =>
         receivedId should equal (id)
         source should not be empty
