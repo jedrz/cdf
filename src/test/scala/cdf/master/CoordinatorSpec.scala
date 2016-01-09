@@ -7,8 +7,8 @@ import cdf.finder.Finder
 import cdf.matcher.Matcher
 import cdf.offer.Offer
 
-class CoordinatorWithMocks(query: String, val finders: Vector[ActorRef], val matcher: ActorRef)
-  extends Coordinator(query)
+class CoordinatorWithMocks(query: String, replyTo: ActorRef, val finders: Vector[ActorRef], val matcher: ActorRef)
+  extends Coordinator(query, replyTo)
   with CoordinatorComponent
 
 class CoordinatorSpec extends ActorSpec(classOf[CoordinatorSpec]) {
@@ -20,11 +20,13 @@ class CoordinatorSpec extends ActorSpec(classOf[CoordinatorSpec]) {
     Offer(title = "title 3", url = "url 3", price = BigDecimal.valueOf(30))
   )
   val finderProbes = Vector(finder1Probe, finder2Probe)
+  val findersOffers = finder1Offers ++ finder2Offers
   val matcherProbe = TestProbe()
+  val matchedOffers = findersOffers.grouped(1).toList
   val query = "query"
 
   it should "do all the things" in {
-    system.actorOf(Props(new CoordinatorWithMocks(query, finderProbes.map(_.ref), matcherProbe.ref)))
+    system.actorOf(Props(new CoordinatorWithMocks(query, self, finderProbes.map(_.ref), matcherProbe.ref)))
 
     finderProbes.foreach(_.expectMsg(Finder.Find(query)))
 
@@ -34,6 +36,10 @@ class CoordinatorSpec extends ActorSpec(classOf[CoordinatorSpec]) {
 
     finder2Probe.reply(Coordinator.Offers(finder2Offers))
 
-    matcherProbe.expectMsg(Matcher.Match(finder1Offers ++ finder2Offers))
+    matcherProbe.expectMsg(Matcher.Match(findersOffers))
+
+    matcherProbe.reply(Coordinator.MatchResult(matchedOffers))
+
+    expectMsg(Coordinator.MatchResult(matchedOffers))
   }
 }

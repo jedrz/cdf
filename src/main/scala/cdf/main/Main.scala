@@ -1,11 +1,12 @@
 package cdf.main
 
 import akka.actor.ActorSystem
-import cdf.master.Coordinator
+import cdf.master.Master
 
 object Main {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem()
-    system.actorOf(Coordinator.props("ubik"))
+    val master = system.actorOf(Master.props, "master")
+    master ! Master.Query("ubik")
   }
 }

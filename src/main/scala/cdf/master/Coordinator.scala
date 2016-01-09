@@ -2,7 +2,6 @@ package cdf.master
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import cdf.finder.aros.ArosFinder
-import cdf.finder.download.Downloader
 import cdf.finder.{Finder, SimpleFinder}
 import cdf.matcher.Matcher
 import cdf.offer.Offer
@@ -11,8 +10,8 @@ object Coordinator {
   case class Offers(list: List[Offer])
   case class MatchResult(groups: List[List[Offer]])
 
-  def props(query: String): Props = {
-    Props(classOf[DefaultCoordinator], query)
+  def props(query: String, replyTo: ActorRef, downloader: ActorRef): Props = {
+    Props(classOf[DefaultCoordinator], query, replyTo, downloader)
   }
 }
 
@@ -21,7 +20,7 @@ trait CoordinatorComponent {
   val matcher: ActorRef
 }
 
-class Coordinator(val query: String) extends Actor with ActorLogging {
+class Coordinator(val query: String, replyTo: ActorRef) extends Actor with ActorLogging {
   this: CoordinatorComponent =>
 
   var receivedOffers: Vector[List[Offer]] = Vector.empty
@@ -37,12 +36,13 @@ class Coordinator(val query: String) extends Actor with ActorLogging {
       if (receivedOffers.size == finders.size) {
         matcher ! Matcher.Match(receivedOffers.flatten.toList)
       }
-    case matchResult: Coordinator.MatchResult => log.info("Match result {}", matchResult)
+    case matchResult: Coordinator.MatchResult =>
+      replyTo ! matchResult
+      context.stop(self)
   }
 }
 
-class DefaultCoordinator(query: String) extends Coordinator(query) with CoordinatorComponent {
-  val downloader = context.actorOf(Downloader.props, "downloader")
+class DefaultCoordinator(query: String, replyTo: ActorRef, downloader: ActorRef) extends Coordinator(query, replyTo) with CoordinatorComponent {
   override val finders = Vector(
     context.actorOf(SimpleFinder.props, "simpleFinder"),
     context.actorOf(ArosFinder.props(downloader), "arosFinder")
