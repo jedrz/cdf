@@ -1,39 +1,36 @@
 package cdf.master
 
+import java.util.concurrent.atomic.AtomicLong
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import cdf.finder.{Finder, SimpleFinder}
-import cdf.matcher.Matcher
-import cdf.offer.Offer
+import cdf.finder.download.Downloader
 
 object Master {
-  case class Offers(list: List[Offer])
-  case class MatchResult(groups: List[List[Offer]])
+  case class Query(value: String)
 
-  def props(query: String): Props = {
-    Props(classOf[DefaultMaster], query)
+  def props: Props = {
+    Props[DefaultMaster]
   }
 }
 
 trait MasterComponent {
-  // TODO: it should be a list of finders
-  val finder: ActorRef
-  val matcher: ActorRef
+  val downloader: ActorRef
 }
 
-class Master(val query: String) extends Actor with ActorLogging {
+class Master extends Actor with ActorLogging {
   this: MasterComponent =>
 
-  override def preStart(): Unit = {
-    finder ! Finder.Find(query)
-  }
+  val seqNumber = new AtomicLong()
 
   override def receive: Receive = {
-    case offers: Master.Offers => matcher ! Matcher.Match(offers.list)
-    case matchResult: Master.MatchResult => log.info("Match result {}", matchResult)
+    case Master.Query(query) =>
+      val coordinatorId = seqNumber.incrementAndGet
+      context.actorOf(Coordinator.props(query, self, downloader), s"coordinator$coordinatorId")
+    case matchResult: Coordinator.MatchResult =>
+      log.info("Match result {}", matchResult)
   }
 }
 
-class DefaultMaster(query: String) extends Master(query) with MasterComponent {
-  override val finder = context.actorOf(SimpleFinder.props, "finder")
-  override val matcher = context.actorOf(Matcher.props, "matcher")
+class DefaultMaster extends Master with MasterComponent {
+  val downloader = context.actorOf(Downloader.props, "downloader")
 }

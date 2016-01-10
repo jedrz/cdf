@@ -6,6 +6,9 @@ import cdf.master.Master
 object Main {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem()
-    system.actorOf(Master.props("query"))
+    val master = system.actorOf(Master.props, "master")
+    master ! Master.Query("ubik")
+    master ! Master.Query("nocny patrol")
+    master ! Master.Query("pustynna włócznia")
   }
 }

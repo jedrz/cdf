@@ -1,7 +1,7 @@
 package cdf.finder
 
 import akka.actor.{Actor, Props}
-import cdf.master.Master
+import cdf.master.Coordinator
 import cdf.offer.Offer
 
 object SimpleFinder {
@@ -17,6 +17,6 @@ class SimpleFinder extends Actor {
         Offer(title = "1", url = "http://" + query, price = BigDecimal.valueOf(35)),
         Offer(title = "2", url = "http://" + query, price = BigDecimal.valueOf(30))
       )
-      sender ! Master.Offers(offers)
+      sender ! Coordinator.Offers(offers)
   }
 }
