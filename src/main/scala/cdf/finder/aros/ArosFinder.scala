@@ -24,12 +24,13 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
   this: ArosFinderComponent =>
 
   val seqNumber = new AtomicLong()
+  val encoding = "ISO-8859-2"
 
   override def receive: Receive = {
     case Finder.Find(query) =>
       log.info("Received {} query to search in aros", query)
       val queryUrl = arosUtil.createSearchQuery(query)
-      downloader ! Downloader.Download(seqNumber.incrementAndGet, queryUrl)
+      downloader ! Downloader.Download(seqNumber.incrementAndGet, queryUrl, encoding)
       context become waitingForSearchResults(sender)
   }
 
@@ -40,7 +41,7 @@ class ArosFinder(val downloader: ActorRef) extends Actor with ActorLogging {
       val idToLinkMap = linksToBooks.map((seqNumber.incrementAndGet, _)).toMap
       idToLinkMap foreach {
         case (id, link) =>
-          downloader ! Downloader.Download(id, link)
+          downloader ! Downloader.Download(id, link, encoding)
       }
       context become collectingOffers(replyToWithOffers, idToLinkMap.keySet, idToLinkMap)
   }
