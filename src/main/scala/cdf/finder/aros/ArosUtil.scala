@@ -7,7 +7,8 @@ import cdf.offer.Offer
 import net.ruippeixotog.scalascraper.browser.Browser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL._
-import org.jsoup.nodes.Element
+import org.jsoup.nodes.{Document, Element, Node, TextNode}
+import org.jsoup.select.NodeVisitor
 
 import scala.util.Try
 
@@ -25,6 +26,10 @@ class ArosUtil {
 
   private val beforeAndWithDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(0) font"
   private val afterDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(1) div:eq(0) font"
+
+  private val descriptionSelector = """
+      |html body div table:eq(0) tbody tr td table tbody tr td:eq(1) table:eq(2)
+      |tbody tr:eq(1) td:eq(1) table tbody tr td span""".stripMargin
 
   def createSearchQuery(query: String): String = {
     val escapedQuery = query.replace(' ', '+')
@@ -52,8 +57,26 @@ class ArosUtil {
         title = title,
         url = url,
         price = BigDecimal(price),
-        author = author
+        author = author,
+        description = parseDescription(document)
       )
     }
+  }
+
+  private def parseDescription(document: Document): String = {
+    val offerElement: Element = document >> element(descriptionSelector)
+    val descriptionElements = offerElement.childNodes.toList.drop(2)
+    val descriptionBuilder = new StringBuilder
+    descriptionElements.foreach(_.traverse(new NodeVisitor {
+      override def tail(node: Node, depth: Int): Unit = {
+        node match {
+          case textNode: TextNode =>
+            descriptionBuilder.append(textNode.text).append('\n')
+          case _ =>
+        }
+      }
+      override def head(node: Node, depth: Int): Unit = ()
+    }))
+    descriptionBuilder.toString
   }
 }
