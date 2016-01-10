@@ -3,6 +3,7 @@ package cdf.finder.aros
 import java.text.NumberFormat
 import java.util.Locale
 
+import cdf.finder.FinderUtil
 import cdf.offer.Offer
 import net.ruippeixotog.scalascraper.browser.Browser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
@@ -12,7 +13,7 @@ import org.jsoup.select.NodeVisitor
 
 import scala.util.Try
 
-class ArosUtil {
+class ArosFinderUtil extends FinderUtil {
   private val browser = new Browser
 
   private val searchResultSelector = """
@@ -25,6 +26,7 @@ class ArosUtil {
       |tr:eq(1) td:eq(1) table tbody tr td span table tbody tr:eq(0) td h1 span""".stripMargin
 
   private val beforeAndWithDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(0) font"
+
   private val afterDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(1) div:eq(0) font"
 
   private val descriptionSelector = """
@@ -42,6 +44,8 @@ class ArosUtil {
     val linksToBooks = aElements.map(_.attr("href"))
     linksToBooks
   }
+
+  def shopName: String = "Aros"
 
   def parseToOffer(source: String, url: String): Try[Offer] = {
     Try {
