@@ -22,7 +22,8 @@ class PreprocessorSpec extends UnitSpec {
     ("word", Vector("word")),
     ("word1   word2 word3", Vector("word1", "word2", "word3")),
     ("word1.  word2, \t word3! \n word4? \n", Vector("word1", "word2", "word3", "word4")),
-    ("w1-w2", Vector("w1", "w2"))
+    ("w1-w2", Vector("w1", "w2")),
+    ("WOrd1 woRD2", Vector("word1", "word2"))
   )
 
   it should "preprocess offer" in {

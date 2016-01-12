@@ -10,7 +10,7 @@ class Preprocessor {
   this: PreprocessorComponent =>
 
   def apply(offer: Offer): Vector[String] = {
-    val completeDescription = offer.completeDescription
+    val completeDescription = offer.completeDescription.toLowerCase
     val tokens = tokenize(completeDescription)
     tokens.map(stemmer(_))
   }
