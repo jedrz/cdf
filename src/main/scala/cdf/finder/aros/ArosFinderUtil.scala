@@ -21,17 +21,14 @@ class ArosFinderUtil extends FinderUtil {
       |table tbody tr:eq(1) td:eq(1) table tbody tr td
       |table tbody tr td:eq(3) div:eq(0) a""".stripMargin
 
-  private val titleSelector = """
-      |html body div table:eq(0) tbody tr td table tbody tr td:eq(1) table:eq(2) tbody
-      |tr:eq(1) td:eq(1) table tbody tr td span table tbody tr:eq(0) td h1 span""".stripMargin
+  private val titleSelector = "span[itemprop=name]"
+
+  private val authorSelector = "span[itemprop=offerDetails] table tbody tr:eq(0) td:eq(1) a b"
 
   private val beforeAndWithDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(0) font"
-
   private val afterDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(1) div:eq(0) font"
 
-  private val descriptionSelector = """
-      |html body div table:eq(0) tbody tr td table tbody tr td:eq(1) table:eq(2)
-      |tbody tr:eq(1) td:eq(1) table tbody tr td span""".stripMargin
+  private val descriptionSelector = "span[itemprop=productDetails]"
 
   def createSearchQuery(query: String): String = {
     val escapedQuery = query.replace(' ', '+')
@@ -49,7 +46,7 @@ class ArosFinderUtil extends FinderUtil {
     Try {
       val document = browser.parseString(source)
       val title = document >> text(titleSelector)
-      val author = (document >> element("td:containsOwn(Autor:)")).parent() >> text("td:eq(1) a b")
+      val author = document >> text(authorSelector)
       val beforeAndWithDecimalPoint = document >> text(beforeAndWithDecimalPointSelector)
       val afterDecimalPoint = document >> text(afterDecimalPointSelector)
       val price = NumberFormat.getInstance(Locale.forLanguageTag("PL"))
