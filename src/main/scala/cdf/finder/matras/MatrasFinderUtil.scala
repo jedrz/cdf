@@ -19,7 +19,7 @@ class MatrasFinderUtil extends FinderUtil {
   private val titleSelector = "div.product-name h1"
 
   private val priceSelector = "p.special-price span.price"
-  
+
   private val authorSelector = "div.product-info-list h3:eq(0) a"
 
   private val descriptionSelector = "div.short-description div"
