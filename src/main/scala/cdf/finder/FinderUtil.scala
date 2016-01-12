@@ -10,6 +10,4 @@ trait FinderUtil {
   def parseSearchResults(source: String): List[String]
 
   def parseToOffer(source: String, url: String): Try[Offer]
-
-  def shopName: String
 }
