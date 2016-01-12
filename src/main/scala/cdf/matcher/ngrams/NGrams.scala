@@ -1,7 +1,8 @@
 package cdf.matcher.ngrams
 
-class NGrams(val n: Int) {
-  def apply(words: Vector[String]): Vector[Vector[String]] = {
-    words.sliding(n).toVector
+case class NGrams(value: Vector[Vector[String]]) {
+  def countCommonNGrams(other: NGrams): Int = {
+    val commonNGrams = value.toSet & other.value.toSet
+    commonNGrams.size
   }
 }
