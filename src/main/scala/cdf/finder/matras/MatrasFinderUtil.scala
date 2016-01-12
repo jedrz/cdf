@@ -29,8 +29,6 @@ class MatrasFinderUtil extends FinderUtil {
     "http://matras.pl/szukaj?query=" + escapedQuery + "&kategoria=65"
   }
 
-  def shopName: String = "Matras"
-
   def parseSearchResults(source: String): List[String] = {
     val document = browser.parseString(source)
     val aElements: List[Element] = document >> elementList(searchResultSelector)

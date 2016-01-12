@@ -45,8 +45,6 @@ class ArosFinderUtil extends FinderUtil {
     linksToBooks
   }
 
-  def shopName: String = "Aros"
-
   def parseToOffer(source: String, url: String): Try[Offer] = {
     Try {
       val document = browser.parseString(source)
