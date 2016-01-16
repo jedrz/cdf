@@ -8,4 +8,8 @@ case class Offer(title: String,
   def completeDescription: String = {
     List(title, author, description).mkString("\n")
   }
+
+  override def toString: String = {
+    s"Offer($url, $title, $author, $price)"
+  }
 }
