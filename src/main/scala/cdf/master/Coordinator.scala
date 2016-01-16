@@ -9,7 +9,7 @@ import cdf.offer.Offer
 
 object Coordinator {
   case class Offers(list: Vector[Offer])
-  
+
   sealed trait MatchResult
   case class SimilarityMatrix(matrix: Array[Array[Double]]) extends MatchResult
 
