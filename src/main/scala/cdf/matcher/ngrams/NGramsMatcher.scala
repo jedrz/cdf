@@ -1,7 +1,7 @@
 package cdf.matcher.ngrams
 
-import cdf.matcher.{DefaultPreprocessor, OfferMatcher, Preprocessor}
-import cdf.offer.{Offer, OffersGroups}
+import cdf.matcher._
+import cdf.offer.Offer
 
 trait NGramsMatcherComponent {
   val preprocessor: Preprocessor
@@ -16,24 +16,28 @@ class NGramsMatcher(val offers: Vector[Offer] = Vector.empty, val n: Int = 2) ex
     copy(offers :+ offer)
   }
 
-  override def compute: OffersGroups = {
+  override def compute: SimilarityMatrixResult = {
     val nGramsEvaluator = nGramsEvaluatorFactory(n)
     val offerToNGrams = offers
       .map(offer => (offer, nGramsEvaluator(preprocessor(offer))))
       .toMap
-    val groups = offers.map(offer => Vector(offer, findClosest(offer, offerToNGrams)))
-    OffersGroups(groups)
+    val matrix = offers
+      .map(offer => createRow(offer, offers, offerToNGrams))
+      .toArray
+    SimilarityMatrixResult(matrix)
   }
 
-  private def findClosest(offer: Offer, offerToNGrams: Map[Offer, NGrams]): Offer = {
-    val offerNGrams = offerToNGrams(offer)
-    val withoutOffer = offerToNGrams - offer
-    val closest = withoutOffer
-      .mapValues(nGrams => nGrams.countCommonNGrams(offerNGrams))
-      .maxBy(_._2)
-    // TODO: Configure slf4j to use logging in not actor classes.
-    println(s"Closest to ${offer.url} is ${closest._1.url} with score ${closest._2}")
-    closest._1
+  private def createRow(offer: Offer,
+                        offers: Vector[Offer],
+                        offerToNGrams: Map[Offer, NGrams]): Array[Double] = {
+    offers
+      .map(otherOffer => computeSimilarityOfNGrams(offerToNGrams(offer), offerToNGrams(otherOffer)))
+      .toArray
+  }
+
+  private def computeSimilarityOfNGrams(nGrams1: NGrams, nGrams2: NGrams): Double = {
+    val commonNGrams = nGrams1.countCommonNGrams(nGrams2).toDouble
+    commonNGrams * 2 / (nGrams1.value.size + nGrams2.value.size)
   }
 }
 

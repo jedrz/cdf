@@ -6,7 +6,7 @@ import cdf.matcher.ngrams.DefaultNGramsMatcher
 import cdf.offer.Offer
 
 object Matcher {
-  case class Match(offers: List[Offer])
+  case class Match(offers: Vector[Offer])
 
   def props: Props = {
     Props[DefaultMatcher]
@@ -23,8 +23,8 @@ class Matcher extends Actor {
   override def receive: Receive = {
     case Matcher.Match(offers) =>
       val offerMatcher = offerMatcherFactory(offers.toVector)
-      val offersGroups = offerMatcher.compute
-      sender ! Coordinator.MatchResult(offersGroups.groups.map(_.toList).toList)
+      val offerMatcherResult = offerMatcher.compute
+      sender ! Coordinator.SimilarityMatrix(offerMatcherResult.matrix)
   }
 }
 
