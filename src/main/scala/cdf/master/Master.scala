@@ -31,10 +31,18 @@ class Master extends Actor with ActorLogging {
       val coordinatorId = seqNumber.incrementAndGet
       context.actorOf(Coordinator.props(query, self, downloader), s"coordinator$coordinatorId")
     case Master.SimilarityMatrix(offers, matrix) =>
-      val readableMatrix = matrix
-        .map(row => row.map("%.3f".format(_)).mkString(" "))
+      val readableOffers = offers
+        .zipWithIndex
+        .map(_.swap)
         .mkString("\n")
-      log.info("Similarity matrix\n{}\nfor offers {}", readableMatrix, offers)
+      val matrixColumnNames = "  " + offers.indices.map("%5d".format(_)).mkString(" ")
+      val readableMatrix = matrixColumnNames + "\n" + matrix
+        .zipWithIndex
+        .map { case (row, index) =>
+          index + " " + row.map("%.3f".format(_)).mkString(" ")
+        }
+        .mkString("\n")
+      log.info("Offers\n{}\nSimilarity matrix\n{}", readableOffers, readableMatrix)
   }
 }
 
