@@ -14,7 +14,7 @@ object Matcher {
 }
 
 trait MatcherComponent {
-  def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher
+  def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[SimilarityMatrixResult]
 }
 
 class Matcher extends Actor {
@@ -22,14 +22,14 @@ class Matcher extends Actor {
 
   override def receive: Receive = {
     case Matcher.Match(offers) =>
-      val offerMatcher = offerMatcherFactory(offers.toVector)
+      val offerMatcher = offerMatcherFactory(offers)
       val offerMatcherResult = offerMatcher.compute
       sender ! Coordinator.SimilarityMatrix(offerMatcherResult.matrix)
   }
 }
 
 class DefaultMatcher extends Matcher with MatcherComponent {
-  override def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher = {
+  override def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[SimilarityMatrixResult] = {
     new DefaultNGramsMatcher(offers, n = 2)
   }
 }

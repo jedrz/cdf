@@ -5,19 +5,13 @@ import cdf.offer.Offer
 
 trait NGramsMatcherComponent {
   val preprocessor: Preprocessor
-  def nGramsEvaluatorFactory(n: Int): NGramsEvaluator
-  def copy(offers: Vector[Offer]): NGramsMatcher
+  val nGramsEvaluator: NGramsEvaluator
 }
 
-class NGramsMatcher(val offers: Vector[Offer] = Vector.empty, val n: Int = 2) extends OfferMatcher {
+class NGramsMatcher(val offers: Vector[Offer]) extends OfferMatcher[SimilarityMatrixResult] {
   this: NGramsMatcherComponent =>
 
-  override def withOffer(offer: Offer): OfferMatcher = {
-    copy(offers :+ offer)
-  }
-
   override def compute: SimilarityMatrixResult = {
-    val nGramsEvaluator = nGramsEvaluatorFactory(n)
     val offerToNGrams = offers
       .map(offer => (offer, nGramsEvaluator(preprocessor(offer))))
       .toMap
@@ -41,12 +35,7 @@ class NGramsMatcher(val offers: Vector[Offer] = Vector.empty, val n: Int = 2) ex
   }
 }
 
-class DefaultNGramsMatcher(offers: Vector[Offer] = Vector.empty, n: Int = 2) extends NGramsMatcher(offers, n) with NGramsMatcherComponent {
+class DefaultNGramsMatcher(offers: Vector[Offer] = Vector.empty, n: Int = 2) extends NGramsMatcher(offers) with NGramsMatcherComponent {
   override val preprocessor = new DefaultPreprocessor
-  override def nGramsEvaluatorFactory(n: Int): NGramsEvaluator = {
-    new NGramsEvaluator(n)
-  }
-  override def copy(offers: Vector[Offer]): DefaultNGramsMatcher = {
-    new DefaultNGramsMatcher(offers, n)
-  }
+  override val nGramsEvaluator: NGramsEvaluator = new NGramsEvaluator(n)
 }
