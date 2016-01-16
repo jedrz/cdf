@@ -8,14 +8,12 @@ class PreprocessorSpec extends UnitSpec {
   class MockableOffer extends Offer(title = "", url = "", price = BigDecimal.valueOf(1), author = "", description = "")
 
   val stemmerStub = stub[Stemmer]
+  val stopWordsProviderStub = stub[StopWordsProvider]
   val preprocessor = new Preprocessor with PreprocessorComponent {
     override val stemmer = stemmerStub
+    override val stopWordsProvider = stopWordsProviderStub
   }
   val offerStub = stub[MockableOffer]
-
-  before {
-    (stemmerStub.apply _).when(*).onCall(identity[String] _)
-  }
 
   val data = Table(
     ("word", "result"),
@@ -27,6 +25,8 @@ class PreprocessorSpec extends UnitSpec {
   )
 
   it should "preprocess offer" in {
+    (stemmerStub.apply _).when(*).onCall(identity[String] _)
+
     forAll (data) { (description: String, result: Vector[String]) =>
       (offerStub.completeDescription _).when().returns(description)
 
@@ -34,5 +34,17 @@ class PreprocessorSpec extends UnitSpec {
 
       result should contain theSameElementsAs result
     }
+  }
+
+  it should "filter out stop words" in {
+    val description = "i am stop word"
+    (offerStub.completeDescription _).when().returns(description)
+    (stopWordsProviderStub.contains _).when("i").returns(true)
+    (stopWordsProviderStub.contains _).when("am").returns(true)
+    (stemmerStub.apply _).when(*).onCall(identity[String] _)
+
+    val result = preprocessor(offerStub)
+
+    result should contain inOrder("stop", "word")
   }
 }

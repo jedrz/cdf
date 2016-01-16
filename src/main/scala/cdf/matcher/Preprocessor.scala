@@ -4,6 +4,7 @@ import cdf.offer.Offer
 
 trait PreprocessorComponent {
   val stemmer: Stemmer
+  val stopWordsProvider: StopWordsProvider
 }
 
 class Preprocessor {
@@ -12,7 +13,9 @@ class Preprocessor {
   def apply(offer: Offer): Vector[String] = {
     val completeDescription = offer.completeDescription.toLowerCase
     val tokens = tokenize(completeDescription)
-    tokens.map(stemmer(_))
+    tokens
+      .filterNot(stopWordsProvider.contains)
+      .map(stemmer(_))
   }
 
   private def tokenize(text: String): Vector[String] = {
@@ -25,4 +28,5 @@ class Preprocessor {
 
 class DefaultPreprocessor extends Preprocessor with PreprocessorComponent {
   override val stemmer: Stemmer = new Stemmer
+  override val stopWordsProvider: StopWordsProvider = new StopWordsProvider
 }
