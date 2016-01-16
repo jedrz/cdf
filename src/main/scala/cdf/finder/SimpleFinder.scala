@@ -13,7 +13,7 @@ object SimpleFinder {
 class SimpleFinder extends Actor {
   override def receive: Receive = {
     case Finder.Find(query) =>
-      val offers = List(
+      val offers = Vector(
         Offer(title = "1", url = "http://" + query, price = BigDecimal.valueOf(35)),
         Offer(title = "2", url = "http://" + query, price = BigDecimal.valueOf(30))
       )

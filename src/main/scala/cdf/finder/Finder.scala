@@ -48,7 +48,7 @@ class Finder(val downloader: ActorRef) extends Actor with ActorLogging {
   def collectingOffers(replyToWithOffers: ActorRef,
                        ids: Set[Long],
                        idToLinkMap: Map[Long, String],
-                       offers: List[Offer] = Nil): Receive = {
+                       offers: Vector[Offer] = Vector.empty): Receive = {
     case Downloader.DownloadResult(id, source) =>
       val newIds = ids - id
       val url = idToLinkMap(id)
@@ -62,10 +62,10 @@ class Finder(val downloader: ActorRef) extends Actor with ActorLogging {
       }
   }
 
-  private def parseOfferAndAdd(offers: List[Offer], source: String, url: String): List[Offer] = {
+  private def parseOfferAndAdd(offers: Vector[Offer], source: String, url: String): Vector[Offer] = {
     val offerTry = util.parseToOffer(source, url)
     val newOffers = offerTry match {
-      case Success(offer) => offer :: offers
+      case Success(offer) => offers :+ offer
       case Failure(exception) =>
         log.error(exception, "Parsing offer {} failed", url)
         offers

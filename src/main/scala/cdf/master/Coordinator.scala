@@ -8,8 +8,10 @@ import cdf.matcher.Matcher
 import cdf.offer.Offer
 
 object Coordinator {
-  case class Offers(list: List[Offer])
-  case class MatchResult(groups: List[List[Offer]])
+  case class Offers(list: Vector[Offer])
+
+  sealed trait MatchResult
+  case class SimilarityMatrix(matrix: Array[Array[Double]]) extends MatchResult
 
   def props(query: String, replyTo: ActorRef, downloader: ActorRef): Props = {
     Props(classOf[DefaultCoordinator], query, replyTo, downloader)
@@ -32,21 +34,22 @@ class Coordinator(val query: String, replyTo: ActorRef) extends Actor with Actor
     waitingForOffers(Vector.empty)
   }
 
-  def waitingForOffers(receivedOffers: Vector[List[Offer]]): Receive = {
+  def waitingForOffers(receivedOffersPackets: Vector[Vector[Offer]]): Receive = {
     case Coordinator.Offers(offers) =>
       log.info("Received offers {}", offers)
-      val newReceivedOffers = receivedOffers :+ offers
-      if (newReceivedOffers.size == finders.size) {
-        matcher ! Matcher.Match(newReceivedOffers.flatten.toList)
-        context become waitingForMatchResult
+      val newReceivedOffersPackets = receivedOffersPackets :+ offers
+      if (newReceivedOffersPackets.size == finders.size) {
+        val offers = newReceivedOffersPackets.flatten
+        matcher ! Matcher.Match(offers)
+        context become waitingForMatchResult(offers)
       } else {
-        context become waitingForOffers(newReceivedOffers)
+        context become waitingForOffers(newReceivedOffersPackets)
       }
   }
 
-  def waitingForMatchResult: Receive = {
-    case matchResult: Coordinator.MatchResult =>
-      replyTo ! matchResult
+  def waitingForMatchResult(offers: Vector[Offer]): Receive = {
+    case Coordinator.SimilarityMatrix(matrix) =>
+      replyTo ! Master.SimilarityMatrix(offers, matrix)
       context.stop(self)
   }
 }
