@@ -12,7 +12,7 @@ trait NGramsMeasureComponent {
 class NGramsMeasure extends DistanceMeasure {
   this: NGramsMeasureComponent =>
 
-  override def distance(offer1: Offer, offer2: Offer): Double = {
+  override def apply(offer1: Offer, offer2: Offer): Double = {
     val nGrams1 = nGramsEvaluator(preprocessor(offer1))
     val nGrams2 = nGramsEvaluator(preprocessor(offer2))
     computeSimilarityOfNGrams(nGrams1, nGrams2)

@@ -12,6 +12,7 @@ object Coordinator {
 
   sealed trait MatchResult
   case class SimilarityMatrix(matrix: Array[Array[Double]]) extends MatchResult
+  case class OffersGroups(groups: Vector[Vector[Offer]]) extends MatchResult
 
   def props(query: String, replyTo: ActorRef, downloader: ActorRef): Props = {
     Props(classOf[DefaultCoordinator], query, replyTo, downloader)
@@ -48,8 +49,8 @@ class Coordinator(val query: String, replyTo: ActorRef) extends Actor with Actor
   }
 
   def waitingForMatchResult(offers: Vector[Offer]): Receive = {
-    case Coordinator.SimilarityMatrix(matrix) =>
-      replyTo ! Master.SimilarityMatrix(offers, matrix)
+    case Coordinator.OffersGroups(groups) =>
+      replyTo ! Master.OffersGroups(groups)
       context.stop(self)
   }
 }
