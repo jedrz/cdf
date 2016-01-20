@@ -25,8 +25,8 @@ class ArosFinderUtil extends FinderUtil {
 
   private val authorSelector = "span[itemprop=offerDetails] table tbody tr:eq(0) td:eq(1) a b"
 
-  private val beforeAndWithDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(0) font"
-  private val afterDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(1) div:eq(0) font"
+  private val beforeAndWithDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(0) font:matches(\\d+)"
+  private val afterDecimalPointSelector = "tr:eq(1) td table tbody tr td:eq(1) div:eq(0) font:matches(\\d+)"
 
   private val descriptionSelector = "span[itemprop=productDetails]"
 
