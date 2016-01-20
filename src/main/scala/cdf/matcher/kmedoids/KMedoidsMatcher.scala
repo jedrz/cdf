@@ -10,7 +10,7 @@ class KMedoidsMatcher(val offers: Vector[Offer],
   override def compute: OffersClusteringResult = {
     val kRange = 2 to (offers.size / 2)
     val evaluations = kRange.map(runKMedoids)
-    val bestEvaluation = evaluations.maxBy(_._1)
+    val bestEvaluation = evaluations.minBy(_._1)
     OffersClusteringResult(bestEvaluation._2)
   }
 
@@ -19,7 +19,7 @@ class KMedoidsMatcher(val offers: Vector[Offer],
     val kmedoids = new KMedoids(offers, distanceFun)
     val medoids = kmedoids.run(k)
     val (overallDistance, memberships) = kmedoids.computeClusterMemberships(medoids)
-    println(s"For k = $k clustering is $memberships with overall distance = $overallDistance")
+    println(s"For k = $k clustering is $memberships with overall distance = $overallDistance for offers $offers")
     val clusterIdxToOffersWithIndices = offers
       .zipWithIndex
       .groupBy { case (offer, index) =>
