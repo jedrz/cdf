@@ -11,6 +11,7 @@ object Master {
 
   sealed trait MatchResult
   case class SimilarityMatrix(offers: Vector[Offer], matrix: Array[Array[Double]]) extends MatchResult
+  case class OffersGroups(groups: Vector[Vector[Offer]]) extends MatchResult
 
   def props: Props = {
     Props[DefaultMaster]
@@ -43,6 +44,20 @@ class Master extends Actor with ActorLogging {
         }
         .mkString("\n")
       log.info("Offers\n{}\nSimilarity matrix\n{}", readableOffers, readableMatrix)
+    case Master.OffersGroups(groups) =>
+      val readableGroups = groups
+        .zipWithIndex
+        .map { case (group, index) =>
+          val readableGroup = group
+            .zipWithIndex
+            .map { case (offer, index) =>
+              s"  $index $offer"
+            }
+            .mkString("\n")
+          s"group $index\n$readableGroup"
+        }
+        .mkString("\n")
+      log.info("Offers groups\n{}", readableGroups)
   }
 }
 

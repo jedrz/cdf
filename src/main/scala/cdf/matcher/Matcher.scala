@@ -2,7 +2,8 @@ package cdf.matcher
 
 import akka.actor.{Actor, Props}
 import cdf.master.Coordinator
-import cdf.matcher.ngrams.DefaultNGramsMatcher
+import cdf.matcher.distance.DefaultNGramsMeasure
+import cdf.matcher.kmedoids.DefaultKMedoidsMatcher
 import cdf.offer.Offer
 
 object Matcher {
@@ -14,7 +15,7 @@ object Matcher {
 }
 
 trait MatcherComponent {
-  def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[SimilarityMatrixResult]
+  def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[OffersClusteringResult]
 }
 
 class Matcher extends Actor {
@@ -24,12 +25,12 @@ class Matcher extends Actor {
     case Matcher.Match(offers) =>
       val offerMatcher = offerMatcherFactory(offers)
       val offerMatcherResult = offerMatcher.compute
-      sender ! Coordinator.SimilarityMatrix(offerMatcherResult.matrix)
+      sender ! Coordinator.OffersGroups(offerMatcherResult.clusters)
   }
 }
 
 class DefaultMatcher extends Matcher with MatcherComponent {
-  override def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[SimilarityMatrixResult] = {
-    new DefaultNGramsMatcher(offers, n = 2)
+  override def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[OffersClusteringResult] = {
+    new DefaultKMedoidsMatcher(offers, new DefaultNGramsMeasure(n = 2))
   }
 }

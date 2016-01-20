@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
   "net.ruippeixotog" %% "scala-scraper" % "0.1.2",
   "org.carrot2" % "morfologik-polish" % "2.0.1",
+  "org.scalanlp" % "nak_2.11" % "1.3",
   "org.scalatest" % "scalatest_2.11" % "2.2.5" % "test",
   "org.scalacheck" %% "scalacheck" % "1.12.4" % "test",
   "org.scalamock" %% "scalamock-scalatest-support" % "3.2" % "test"

@@ -22,14 +22,7 @@ class CoordinatorSpec extends ActorSpec(classOf[CoordinatorSpec]) {
   val finderProbes = Vector(finder1Probe, finder2Probe)
   val findersOffers = finder1Offers ++ finder2Offers
   val matcherProbe = TestProbe()
-  val similarityMatrix = {
-    val matrix = Array.ofDim[Double](2, 2)
-    matrix(0)(0) = 1.0
-    matrix(0)(1) = 2.0
-    matrix(1)(0) = 3.0
-    matrix(1)(1) = 4.0
-    matrix
-  }
+  val offersGroups = Vector(finder1Offers, finder2Offers)
   val query = "query"
 
   it should "do all the things" in {
@@ -46,9 +39,9 @@ class CoordinatorSpec extends ActorSpec(classOf[CoordinatorSpec]) {
 
     matcherProbe.expectMsg(Matcher.Match(findersOffers))
 
-    matcherProbe.reply(Coordinator.SimilarityMatrix(similarityMatrix))
+    matcherProbe.reply(Coordinator.OffersGroups(offersGroups))
 
-    expectMsg(Master.SimilarityMatrix(findersOffers, similarityMatrix))
+    expectMsg(Master.OffersGroups(offersGroups))
     expectTerminated(coordinator)
   }
 }
