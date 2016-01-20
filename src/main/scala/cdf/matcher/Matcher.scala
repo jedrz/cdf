@@ -3,7 +3,7 @@ package cdf.matcher
 import akka.actor.{Actor, Props}
 import cdf.master.Coordinator
 import cdf.matcher.distance.DefaultNGramsMeasure
-import cdf.matcher.kmedoids.KMedoidsMatcher
+import cdf.matcher.kmedoids.DefaultKMedoidsMatcher
 import cdf.offer.Offer
 
 object Matcher {
@@ -31,6 +31,6 @@ class Matcher extends Actor {
 
 class DefaultMatcher extends Matcher with MatcherComponent {
   override def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[OffersClusteringResult] = {
-    new KMedoidsMatcher(offers, new DefaultNGramsMeasure(n = 2))
+    new DefaultKMedoidsMatcher(offers, new DefaultNGramsMeasure(n = 2))
   }
 }

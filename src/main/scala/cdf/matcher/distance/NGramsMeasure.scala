@@ -1,20 +1,17 @@
 package cdf.matcher.distance
 
 import cdf.matcher.ngrams.{NGrams, NGramsEvaluator}
-import cdf.matcher.{DefaultPreprocessor, Preprocessor}
-import cdf.offer.Offer
 
 trait NGramsMeasureComponent {
-  val preprocessor: Preprocessor
   val nGramsEvaluator: NGramsEvaluator
 }
 
 class NGramsMeasure extends DistanceMeasure {
   this: NGramsMeasureComponent =>
 
-  override def apply(offer1: Offer, offer2: Offer): Double = {
-    val nGrams1 = nGramsEvaluator(preprocessor(offer1))
-    val nGrams2 = nGramsEvaluator(preprocessor(offer2))
+  override def apply(words1: Vector[String], words2: Vector[String]): Double = {
+    val nGrams1 = nGramsEvaluator(words1)
+    val nGrams2 = nGramsEvaluator(words2)
     1 - computeSimilarityOfNGrams(nGrams1, nGrams2)
   }
 
@@ -25,6 +22,5 @@ class NGramsMeasure extends DistanceMeasure {
 }
 
 class DefaultNGramsMeasure(n: Int = 2) extends NGramsMeasure with NGramsMeasureComponent {
-  override val preprocessor = new DefaultPreprocessor
   override val nGramsEvaluator = new NGramsEvaluator(n)
 }
