@@ -15,7 +15,7 @@ class NGramsMeasure extends DistanceMeasure {
   override def apply(offer1: Offer, offer2: Offer): Double = {
     val nGrams1 = nGramsEvaluator(preprocessor(offer1))
     val nGrams2 = nGramsEvaluator(preprocessor(offer2))
-    computeSimilarityOfNGrams(nGrams1, nGrams2)
+    1 - computeSimilarityOfNGrams(nGrams1, nGrams2)
   }
 
   private def computeSimilarityOfNGrams(nGrams1: NGrams, nGrams2: NGrams): Double = {

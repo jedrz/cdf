@@ -45,10 +45,19 @@ class Master extends Actor with ActorLogging {
         .mkString("\n")
       log.info("Offers\n{}\nSimilarity matrix\n{}", readableOffers, readableMatrix)
     case Master.OffersGroups(groups) =>
-      groups
-        .map(_.toString)
+      val readableGroups = groups
+        .zipWithIndex
+        .map { case (group, index) =>
+          val readableGroup = group
+            .zipWithIndex
+            .map { case (offer, index) =>
+              s"  $index $offer"
+            }
+            .mkString("\n")
+          s"group $index\n$readableGroup"
+        }
         .mkString("\n")
-      log.info("Offers groups\n{}", groups)
+      log.info("Offers groups\n{}", readableGroups)
   }
 }
 

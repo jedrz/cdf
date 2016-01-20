@@ -1,9 +1,9 @@
 package cdf.master
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import cdf.finder.Finder
 import cdf.finder.aros.ArosFinder
 import cdf.finder.matras.MatrasFinder
-import cdf.finder.{Finder, SimpleFinder}
 import cdf.matcher.Matcher
 import cdf.offer.Offer
 
@@ -57,7 +57,6 @@ class Coordinator(val query: String, replyTo: ActorRef) extends Actor with Actor
 
 class DefaultCoordinator(query: String, replyTo: ActorRef, downloader: ActorRef) extends Coordinator(query, replyTo) with CoordinatorComponent {
   override val finders = Vector(
-    context.actorOf(SimpleFinder.props, "simpleFinder"),
     context.actorOf(MatrasFinder.props(downloader), "matrasFinder"),
     context.actorOf(ArosFinder.props(downloader), "arosFinder")
   )
