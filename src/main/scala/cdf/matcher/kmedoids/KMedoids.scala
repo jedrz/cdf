@@ -26,28 +26,32 @@ class KMedoids[T](examples: IndexedSeq[T],
 
   private def runOnce(initialMedoids: IndexedSeq[T]): (Boolean, IndexedSeq[T]) = {
     val productSeq = KMedoidsUtil.cartesianProduct(initialMedoids.indices, examples.indices)
+    val (initialOverallDistance, _) = computeClusterMemberships(initialMedoids)
     val initialChanged = false
-    productSeq.foldLeft((initialChanged, initialMedoids))((acc, product) =>
-      (acc, product) match {
-        case ((changed, medoids), (medoidIdx, exampleIdx)) =>
-          val maybeUpdatedMedoids = trySwap(medoidIdx, exampleIdx, medoids)
-          maybeUpdatedMedoids match {
-            case Some(updatedMedoids) => (true, updatedMedoids)
-            case None => (changed, medoids)
-          }
-      })
+    val (resultChanged, resultMedoids, _) =
+      productSeq.foldLeft((initialChanged, initialMedoids, initialOverallDistance))((acc, product) =>
+        (acc, product) match {
+          case ((changed, medoids, overallDistance), (medoidIdx, exampleIdx)) =>
+            val maybeUpdatedMedoids = trySwap(medoidIdx, exampleIdx, medoids, overallDistance)
+            maybeUpdatedMedoids match {
+              case Some((updatedMedoids, newOverallDistance)) => (true, updatedMedoids, newOverallDistance)
+              case None => (changed, medoids, overallDistance)
+            }
+        })
+    (resultChanged, resultMedoids)
   }
 
-  private def trySwap(medoidIdx: Int, exampleIdx: Int, medoids: IndexedSeq[T]): Option[IndexedSeq[T]] = {
+  private def trySwap(medoidIdx: Int,
+                      exampleIdx: Int,
+                      medoids: IndexedSeq[T],
+                      overallDistance: Double): Option[(IndexedSeq[T], Double)] = {
     if (exampleIdx == medoidIdx) {
       None
     } else {
-      // This should be a param.
-      val (overallDistance, _) = computeClusterMemberships(medoids)
       val newMedoids = medoids.updated(medoidIdx, examples(exampleIdx))
       val (newOverallDistance, _) = computeClusterMemberships(newMedoids)
       if (newOverallDistance < overallDistance) {
-        Some(newMedoids)
+        Some((newMedoids, newOverallDistance))
       } else {
         None
       }
@@ -55,17 +59,13 @@ class KMedoids[T](examples: IndexedSeq[T],
   }
 
   def computeClusterMemberships(medoids: IndexedSeq[T]): (Double, IndexedSeq[Int]) = {
-    val memberships = examples
+    val membershipsAndDistances = examples
       .map(example => medoids
-        .zipWithIndex
-        .minBy { case (medoid, index) =>
-          distanceFun(medoid, example)
-        }
-        ._2
+        .indices
+        .map(medoidIdx => (medoidIdx, distanceFun(medoids(medoidIdx), example)))
+        .minBy(_._2)
       )
-    val overallDistance = memberships.zip(examples).map { case (closestMedoidIdx, example) =>
-      distanceFun(medoids(closestMedoidIdx), example)
-    }.sum
-    (overallDistance, memberships)
+    val (memberships, distances) = membershipsAndDistances.unzip
+    (distances.sum, memberships.toIndexedSeq)
   }
 }
