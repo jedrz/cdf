@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import cdf.finder.Finder
 import cdf.finder.aros.ArosFinder
 import cdf.finder.empik.EmpikFinder
+import cdf.finder.kw.KWFinder
 import cdf.finder.matras.MatrasFinder
 import cdf.matcher.Matcher
 import cdf.offer.Offer
@@ -60,7 +61,8 @@ class DefaultCoordinator(query: String, replyTo: ActorRef, downloader: ActorRef)
   override val finders = Vector(
     context.actorOf(MatrasFinder.props(downloader), "matrasFinder"),
     context.actorOf(ArosFinder.props(downloader), "arosFinder"),
-    context.actorOf(EmpikFinder.props(downloader), "empikFinder")
+    context.actorOf(EmpikFinder.props(downloader), "empikFinder"),
+    context.actorOf(KWFinder.props(downloader), "kwFinder")
   )
   override val matcher = context.actorOf(Matcher.props, "matcher")
 }
