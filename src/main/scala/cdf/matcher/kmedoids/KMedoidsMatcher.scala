@@ -1,6 +1,6 @@
 package cdf.matcher.kmedoids
 
-import cdf.matcher.distance.{CosineWithTfIdfMeasure, DistanceMeasure}
+import cdf.matcher.distance.{CacheableDistanceMeasure, CosineWithTfIdfMeasure, DistanceMeasure}
 import cdf.matcher.{DefaultPreprocessor, OfferMatcher, OffersClusteringResult, Preprocessor}
 import cdf.offer.Offer
 
@@ -45,6 +45,6 @@ class DefaultKMedoidsMatcher(offers: Vector[Offer]) extends KMedoidsMatcher(offe
   override val preprocessor = new DefaultPreprocessor
   override val distanceMeasure = {
     val preprocessedOffers = offers.map(preprocessor(_))
-    CosineWithTfIdfMeasure.build(preprocessedOffers)
+    new CacheableDistanceMeasure(CosineWithTfIdfMeasure.build(preprocessedOffers))
   }
 }

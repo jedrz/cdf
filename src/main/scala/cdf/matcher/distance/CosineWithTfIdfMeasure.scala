@@ -1,23 +1,16 @@
 package cdf.matcher.distance
 
-import scalaz.Memo
-
 class CosineWithTfIdfMeasure(val documents: Vector[Map[String, Int]]) extends DistanceMeasure {
 
   override def apply(words1: Vector[String], words2: Vector[String]): Double = {
-    memoizedTfIdf((words1, words2))
+    val tfIdf1 = tfidf(words1)
+    val tfIdf2 = tfidf(words2)
+    val dotProduct = tfIdf1.foldLeft(0.0)((acc, elem) => {
+      val (word, tfIdf1Value) = elem
+      acc + tfIdf1Value * tfIdf2(word)
+    })
+    1 - dotProduct / (sumOfSquared(tfIdf1.values) + sumOfSquared(tfIdf2.values))
   }
-
-  private val memoizedTfIdf: ((Vector[String], Vector[String])) => Double =
-    Memo.immutableHashMapMemo { case (words1, words2) =>
-      val tfIdf1 = tfidf(words1)
-      val tfIdf2 = tfidf(words2)
-      val dotProduct = tfIdf1.foldLeft(0.0)((acc, elem) => {
-        val (word, tfIdf1Value) = elem
-        acc + tfIdf1Value * tfIdf2(word)
-      })
-      1 - dotProduct / (sumOfSquared(tfIdf1.values) + sumOfSquared(tfIdf2.values))
-    }
 
   private def tfidf(words: Vector[String]): Map[String, Double] = {
     val tfMeasure = tf(words)
