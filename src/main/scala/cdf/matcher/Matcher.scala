@@ -24,7 +24,8 @@ class Matcher extends Actor {
     case Matcher.Match(offers) =>
       val offerMatcher = offerMatcherFactory(offers)
       val offerMatcherResult = offerMatcher.compute
-      sender ! Coordinator.OffersGroups(offerMatcherResult.clusters)
+      val groups = offerMatcherResult.clusters.map(_.sortBy(_.price))
+      sender ! Coordinator.OffersGroups(groups)
   }
 }
 
