@@ -2,7 +2,6 @@ package cdf.matcher
 
 import akka.actor.{Actor, Props}
 import cdf.master.Coordinator
-import cdf.matcher.distance.DefaultNGramsMeasure
 import cdf.matcher.kmedoids.DefaultKMedoidsMatcher
 import cdf.offer.Offer
 
@@ -25,12 +24,13 @@ class Matcher extends Actor {
     case Matcher.Match(offers) =>
       val offerMatcher = offerMatcherFactory(offers)
       val offerMatcherResult = offerMatcher.compute
-      sender ! Coordinator.OffersGroups(offerMatcherResult.clusters)
+      val groups = offerMatcherResult.clusters.map(_.sortBy(_.price))
+      sender ! Coordinator.OffersGroups(groups)
   }
 }
 
 class DefaultMatcher extends Matcher with MatcherComponent {
   override def offerMatcherFactory(offers: Vector[Offer]): OfferMatcher[OffersClusteringResult] = {
-    new DefaultKMedoidsMatcher(offers, new DefaultNGramsMeasure(n = 2))
+    new DefaultKMedoidsMatcher(offers)
   }
 }

@@ -8,11 +8,13 @@ class Stemmer {
   private val polishStemmer = new PolishStemmer
 
   def apply(word: String): String = {
-    polishStemmer
-      .lookup(word)
-      .map(_.getStem)
-      .headOption
-      .getOrElse(word)
-      .toString
+    synchronized {
+      polishStemmer
+        .lookup(word)
+        .map(_.getStem)
+        .headOption
+        .getOrElse(word)
+        .toString
+    }
   }
 }

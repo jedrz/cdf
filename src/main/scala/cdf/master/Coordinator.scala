@@ -43,11 +43,20 @@ class Coordinator(val query: String, replyTo: ActorRef) extends Actor with Actor
       val newReceivedOffersPackets = receivedOffersPackets :+ offers
       if (newReceivedOffersPackets.size == finders.size) {
         val offers = newReceivedOffersPackets.flatten
+        logOffers(offers)
         matcher ! Matcher.Match(offers)
         context become waitingForMatchResult(offers)
       } else {
         context become waitingForOffers(newReceivedOffersPackets)
       }
+  }
+
+  private def logOffers(offers: Vector[Offer]): Unit = {
+    val readableOffers = offers
+      .zipWithIndex
+      .map(_.swap)
+      .mkString("\n")
+    log.info("All received offers are\n{}\n", readableOffers)
   }
 
   def waitingForMatchResult(offers: Vector[Offer]): Receive = {

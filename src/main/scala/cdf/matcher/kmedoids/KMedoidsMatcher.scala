@@ -1,15 +1,15 @@
 package cdf.matcher.kmedoids
 
-import cdf.matcher.distance.DistanceMeasure
+import cdf.matcher.distance.{CacheableDistanceMeasure, CosineWithTfIdfMeasure, DistanceMeasure}
 import cdf.matcher.{DefaultPreprocessor, OfferMatcher, OffersClusteringResult, Preprocessor}
 import cdf.offer.Offer
 
 trait KMedoidsMatcherComponent {
   val preprocessor: Preprocessor
+  val distanceMeasure: DistanceMeasure
 }
 
-class KMedoidsMatcher(val offers: Vector[Offer],
-                      val distanceMeasure: DistanceMeasure) extends OfferMatcher[OffersClusteringResult] {
+class KMedoidsMatcher(val offers: Vector[Offer]) extends OfferMatcher[OffersClusteringResult] {
   this: KMedoidsMatcherComponent =>
 
   override def compute: OffersClusteringResult = {
@@ -39,7 +39,12 @@ class KMedoidsMatcher(val offers: Vector[Offer],
   }
 }
 
-class DefaultKMedoidsMatcher(offers: Vector[Offer], distanceMeasure: DistanceMeasure)
-  extends KMedoidsMatcher(offers, distanceMeasure) with KMedoidsMatcherComponent {
+// This sucks. Matcher should take elements and distance measure to compare. Here this is not the case.
+// To fix this and retain vector of offers, distance measures should implement some caching at least.
+class DefaultKMedoidsMatcher(offers: Vector[Offer]) extends KMedoidsMatcher(offers) with KMedoidsMatcherComponent {
   override val preprocessor = new DefaultPreprocessor
+  override val distanceMeasure = {
+    val preprocessedOffers = offers.map(preprocessor(_))
+    new CacheableDistanceMeasure(CosineWithTfIdfMeasure.build(preprocessedOffers))
+  }
 }
