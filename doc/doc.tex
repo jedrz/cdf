@@ -1,0 +1,60 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{hyperref}
+
+\newcommand{\TODO}[1]{\textcolor{blue}{TODO: #1 \\}}
+\newcommand{\ang}[1]{ang.~{\itshape #1}}
+
+\begin{document}
+
+\title{Cebula Deal Finder\\%
+{\large czyli System wykrywania okazji sprzedażowych w Internecie} }
+
+\author{Łukasz "Cebula" Jędrzejewski \and Igor "Prohibicja" Rodzik \and Artur "Pieseł" Sawicki}
+
+\maketitle
+
+\section{Opis projektu}
+W ramach projektu realizujemy system służący do wykrywania okazji sprzedażowych w internecie. Produktami, jakich ceny porównujemy, są książki.
+Program znajduje wpisany przez użytkownika tytuł na paru serwisach internetowych (zaimplementowanych mamy cztery:
+\href{http://www.empik.com}{empik.com}, \href{http://www.ksiegarniawarszawa.pl}{ksiegarniawarszawa.pl}, \href{http://www.matras.pl}{matras.pl} i \href{http://www.aros.pl}{aros.pl}
+), dopasowuje znalezione pozycje, a następnie porównuje ich ceny i prezentuje je użytkownikowi.
+
+\section{Architektura}
+\TODO{Może jakiś diagramik? Ja to nie umiem rysować...}
+Do realizacji projektu użyliśmy języka scala oraz frameworka Akka do tworzenia i zarządzania aktorami.
+Poniższe sekcje opisują stworzonych przez nas aktorów oraz interakcje między nimi.
+
+\subsection{Władca (\ang{Master})}
+Od tego aktora rozpoczyna się interakcja użytkownika z aplikacją. Jego zadaniem jest przyjęcie tytułu do wyszukiwania i przekazanie pracy nowemu koordynatorowi,
+a także odbiór wyników pracy od koordynatora i ich prezentacja.
+
+\subsection{Koordynator (\ang{Coordinator})}
+Koordynator tworzony jest per wyszukiwany przez użytkownika tytuł. Do jego obowiązków należy przekazanie tytułu do wyszukiwania poszczególnym znajdowaczom,
+zebranie wyników od wszystkich znajdowaczy, przekazanie ofert do dopasowania do dopasowywacza i, finalnie, zwrócenie pogrupowanych pozycji do mastera.
+
+\subsection{Znajdowacz (\ang{Finder})}
+Każdy z serwisów, na których wyszukujemy książki, ma zaimplementowanego znajdowacza właściwego sobie. Każdy z nich potrafi zebrać ze strony listę wyników wyszukiwania,
+a następnie z każdej podstrony zbudować jednolity rezultat oferty. Listę ofert oddaje koordynatorowi. Do pobierania stron każdy ze znajdowaczy korzysta z pobieracza.
+
+\subsection{Pobieracz (\ang{Downloader})}
+Zadanie pobieracza to rozdzielanie żądań pobierania między dostępnych workerów, z których każdy pobiera stronę o podanym adresie URL.
+
+\subsection{Dopasowywacz (\ang{Matcher})}
+Dopasowywacz potrafi pogrupować otrzymane ze wszystkich serwisów oferty, tak aby móc je porównać i zaprezentować użytkownikowi.
+Korzysta w tym celu z algorytmu {\itshape k-medoid}, który zostanie opisany poniżej.
+
+\section{Algorytm {\itshape k-medoid}}
+\TODO{Piszemy coś o tym wogóle?}
+\TODO{A o cachowaniu coś piszemy?}
+
+\section{Wyniki}
+\TODO{A jakie wyniki tu wrzucamy?}
+
+\section{Podsumowanie}
+\TODO{A tu to już wogóle nie wiem co napisać...}
+
+\end{document}
