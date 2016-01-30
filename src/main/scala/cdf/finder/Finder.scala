@@ -23,6 +23,7 @@ trait FinderComponent {
 class Finder(val downloader: ActorRef) extends Actor with ActorLogging {
   this: FinderComponent =>
 
+  val maxOffersSize = 10
   val seqNumber = new AtomicLong()
 
   override def receive: Receive = {
@@ -46,31 +47,35 @@ class Finder(val downloader: ActorRef) extends Actor with ActorLogging {
   }
 
   def collectingOffers(replyToWithOffers: ActorRef,
-                       ids: Set[Long],
+                       remainingIds: Set[Long],
                        idToLinkMap: Map[Long, String],
-                       offers: Vector[Offer] = Vector.empty): Receive = {
+                       collectedIdsAndOffers: Vector[(Long, Offer)] = Vector.empty): Receive = {
     case Downloader.DownloadResult(id, source) =>
-      val newIds = ids - id
+      val newIds = remainingIds - id
       val url = idToLinkMap(id)
-      val newOffers = parseOfferAndAdd(offers, source, url)
+      val newIdsAndOffers = parseOfferAndAdd(collectedIdsAndOffers, source, url, id)
       if (newIds.isEmpty) {
-        replyToWithOffers ! Coordinator.Offers(newOffers)
+        val offersToSend = newIdsAndOffers.sortBy(_._1).map(_._2).take(maxOffersSize)
+        replyToWithOffers ! Coordinator.Offers(offersToSend)
         // This is optional since we assume for now that only one search request is allowed.
         context become receive
       } else {
-        context become collectingOffers(replyToWithOffers, newIds, idToLinkMap, newOffers)
+        context become collectingOffers(replyToWithOffers, newIds, idToLinkMap, newIdsAndOffers)
       }
   }
 
-  private def parseOfferAndAdd(offers: Vector[Offer], source: String, url: String): Vector[Offer] = {
+  private def parseOfferAndAdd(idsAndOffers: Vector[(Long, Offer)],
+                               source: String,
+                               url: String,
+                               id: Long): Vector[(Long, Offer)] = {
     val offerTry = util.parseToOffer(source, url)
-    val newOffers = offerTry match {
-      case Success(offer) => offers :+ offer
+    val newIdsAndOffers = offerTry match {
+      case Success(offer) => idsAndOffers :+ (id, offer)
       case Failure(exception) =>
         log.error(exception, "Parsing offer {} failed", url)
-        offers
+        idsAndOffers
     }
-    newOffers
+    newIdsAndOffers
   }
 }
 
