@@ -116,6 +116,9 @@ grupowania aż~kilkanaście razy.
 
 \subsection{Miara odległości}
 
+Zaimplementowane miary porównują niepodobieństwo dwóch wektorów wyrazów.
+Im~wartość bliższa 0, tym bardziej dwa wektory są~podobne.
+
 \subsubsection{N-gramy}
 N-gramy to n-elementowe ciągi kolejnych słów z rozpatrywanego wektora. Dzięki
 analizie ciągów a nie tylko pojedynczych słów, pod uwagę brana jest również
@@ -125,6 +128,16 @@ n-gramów należą do tej samej grupy.
 
 \subsubsection{Miara kosinusowa i~TFIDF}
 
+Kolejną miarą jest miara kosinusowa połączona z~miarą TFIDF.
+
+Miara TFIDF ma~na~celu wyznaczenie wag wyrazów w~dokumencie. W~taki sposób, aby
+uwzględnić występowanie wyrazu w~dokumencie (miara tf), jaki i~wszystkich
+dokumentach (idf). W~ten sposób wyrazy pospolite we~wszystkich dokumentach będą
+miały niską wagę. Z~kolei te~obecne w~niewielkiej części, wyższą.
+
+Takie wektory porównujemy miarą kosinusową.
+
+Ostatecznie używamy tej miary, gdyż okazała się być nieco trafniejsza.
 
 \subsection{Wybór liczby grup}
 
