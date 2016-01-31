@@ -43,6 +43,8 @@ class Finder(val downloader: ActorRef) extends Actor with ActorLogging {
         case (id, link) =>
           downloader ! Downloader.Download(id, link, encoding)
       }
+      // TODO: Schedule a timeout event if downloading offers takes too long time.
+      // And send all collected offers to coordinator if timeout occurs.
       context become collectingOffers(replyToWithOffers, idToLinkMap.keySet, idToLinkMap)
   }
 
