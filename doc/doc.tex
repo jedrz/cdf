@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[a4paper,12pt]{mwart}
 
 \usepackage{polski}
 \usepackage[utf8]{inputenc}
@@ -47,9 +47,76 @@ Zadanie pobieracza to rozdzielanie żądań pobierania między dostępnych worke
 Dopasowywacz potrafi pogrupować otrzymane ze wszystkich serwisów oferty, tak aby móc je porównać i zaprezentować użytkownikowi.
 Korzysta w tym celu z algorytmu {\itshape k-medoid}, który zostanie opisany poniżej.
 
-\section{Algorytm {\itshape k-medoid}}
-\TODO{Piszemy coś o tym wogóle?}
-\TODO{A o cachowaniu coś piszemy?}
+\section{Dopasowywanie ofert}
+
+\subsection{Przygotowanie danych}
+
+\subsection{Algorytm k-medoid}
+
+\subsection{Miara odległości}
+\TODO{opis cachowania}
+
+\subsubsection{N-gramy}
+
+\subsubsection{Miara kosinusowa i~TFIDF}
+
+\subsection{Wybór liczby grup}
+
+W~zagadnieniu grupowania duży problem stanowi odpowiedni wybór liczby grup.
+Czasem zdarza się, że~wiemy z~góry ile ich powinno być. Jednak w~naszym
+projekcie stanęliśmy przed koniecznością wyboru liczby grup automatycznie.
+
+Pierwszym rozwiązaniem, które opracowaliśmy było uruchomienie algorytmu
+grupowania danych dla zakresu grup $[2, \lceil \frac{n}{2} \rceil]$, gdzie $n$
+to~liczba przykładów. Po~wyznaczeniu grup, sprawdzaliśmy sumy średnich
+odległości między przykładami w~klastrach. Im~opisana suma była mniejsza, tym
+grupowanie traktowaliśmy za~lepsze. Mankamentem tego sposobu oceny jest fakt,
+że~każde grupowanie dla większej liczby grup, będzie lepsze. W~szczególności
+dla grupowania, w~którym liczba przykładów pokrywa się z~liczbą grup, miara
+oceny wyniesie $0$.
+
+W~związku z~tym postanowiliśmy skorzystać z~jednej dostępnych metod oceny
+jakości grupowania, która nie wymaga wiedzy o~\textbf{prawdziwych}
+przypisaniach do~grup. Zaimplementowaliśmy miarę sylwetki (\ang{silhouette}).
+Jej idea polega na~skonfrontowaniu średniej niepodobieństw do~przykładów
+z~takiego samego klastra, jak rozważany przykład -- $a(i)$, gdzie $i$
+to~przykład, oraz najmniejszej średniej niepodobieństw przykładów należących
+do~pozostałych klastrów -- $b(i)$. Następnie zdefiniowany jest wskaźnik:
+
+\[s(i) = \frac{b(i) - a(i)}{\max[a(i), b(i)]}\]
+
+którego najbardziej pożądana wartość powinna być bliska $1$, co~oznacza,
+że~przykład jest znacznie bliższy przykładom w~grupie, do~której należy, niż
+do~jakiejkolwiek z~innych grup. Taka sytuacja zachodzi dla $a(i) \ll~b(i)$.
+
+Wartość miary sylwetki należy do~przedziału $[-1, 1]$, co~kłóciło się
+z~przyjętym w~projekcie założeniem, że~im~mniejsza wartość tym lepsze
+grupowania. Dlatego zmodyfikowaliśmy miarę następująco:
+
+\[s'(i) = \left | s(i) - 1 \right | \]
+
+Ostatecznie zależało nam na~wskaźniku dla całego grupowania, dlatego powyższą
+wartość uśredniamy na~wszystkich przykładach.
+
+Po~zastosowaniu miary sylwetki do~wyboru najlepszego efekty nie były dużo
+lepsze od~pierwszego sposobu oceny. Co~prawda dla niewielkiej liczby grup,
+wartość miary była dość zróżnicowana, to~jednak wraz ze~wzrostem liczby
+klastrów, ciągle malała.
+
+Ta~obserwacja skłoniła nas do~dodania wpływu wielkości grupy na~miarę.
+Zmieniliśmy tylko formułę $a(i)$, czyli średnią odległość przykładu do~innych
+przykładów w~jego grupie, w~poniższy sposób:
+
+\begin{itemize}
+\item grupy jednoelementowe karzemy -- zwracamy $0{,}1$, zamiast $0$
+  w~oryginalnej mierze,
+\item z~kolei większe grupy zdecydowaliśmy się promować -- zwracamy $a(i) /
+  \left (1 + \log_{10} \left | C(i) \right | \right)$, gdzie $\left | C(i)
+  \right |$ to~liczba przykładów w~grupie przykładu $i$, dzieląc przez czynnik
+  zależny od~liczności grupy.
+\end{itemize}
+
+Dopiero tak zmodyfikowana miara sylwetki przyniosła pewną poprawę.
 
 \section{Wyniki}
 \TODO{A jakie wyniki tu wrzucamy?}
