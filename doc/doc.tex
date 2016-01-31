@@ -2,8 +2,12 @@
 
 \usepackage{polski}
 \usepackage[utf8]{inputenc}
+\usepackage{float}
 \usepackage{color}
 \usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning,automata}
+\tikzset{>=stealth',shorten >=1pt,auto,thick,main node/.style={rectangle,fill=blue!30,draw,minimum size=0.8cm,inner sep=10pt,font=\sffamily\large\bfseries},edge/.style={thick,double}}
 
 \newcommand{\TODO}[1]{\textcolor{blue}{TODO: #1 \\}}
 \newcommand{\ang}[1]{ang.~{\itshape #1}}
@@ -11,9 +15,9 @@
 \begin{document}
 
 \title{Cebula Deal Finder\\%
-{\large czyli System wykrywania okazji sprzedażowych w Internecie} }
+{\large czyli system wykrywania okazji sprzedażowych w Internecie} }
 
-\author{Łukasz "Cebula" Jędrzejewski \and Igor "Prohibicja" Rodzik \and Artur "Pieseł" Sawicki}
+\author{Łukasz ,,Cebula'' Jędrzejewski \and Igor ,,Prohibicja'' Rodzik \and Artur ,,Pieseł'' Sawicki}
 
 \maketitle
 
@@ -24,9 +28,27 @@ Program znajduje wpisany przez użytkownika tytuł na paru serwisach internetowy
 ), dopasowuje znalezione pozycje, a następnie porównuje ich ceny i prezentuje je użytkownikowi.
 
 \section{Architektura}
-\TODO{Może jakiś diagramik? Ja to nie umiem rysować...}
 Do realizacji projektu użyliśmy języka scala oraz frameworka Akka do tworzenia i zarządzania aktorami.
 Poniższe sekcje opisują stworzonych przez nas aktorów oraz interakcje między nimi.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[main node, on grid] (v1) {Master};
+    \node[main node, on grid] (v2) [below = 2cm of v1]  {Koordynator};
+    \node[main node, on grid] (v3) [below right = 2cm and 3cm of v2] {Znajdowacz};
+    \node[main node, on grid] (v4) [below = 6cm of v1] {Pobieracz};
+    \node[main node, on grid] (v5) [below left = 2cm and 3cm of v2] {Dopasowywacz};
+    \node[main node, on grid] (v6) [below = 2cm of v4] {Pracownik};
+    \path[edge] (v1) edge [<->] node {} (v2);
+    \path[edge] (v2) edge [<->] node {} (v3);
+    \path[edge] (v2) edge [<->] node {} (v5);
+    \path[edge] (v3) edge [<->] node {} (v4);
+    \path[edge] (v5) edge [<->] node {} (v4);
+    \path[edge] (v4) edge [<->] node {} (v6);
+  \end{tikzpicture}
+  \caption{Dragram prezentujący interakcje między aktorami}
+\end{figure}
 
 \subsection{Władca (\ang{Master})}
 Od tego aktora rozpoczyna się interakcja użytkownika z aplikacją. Jego zadaniem jest przyjęcie tytułu do wyszukiwania i przekazanie pracy nowemu koordynatorowi,
@@ -41,24 +63,38 @@ Każdy z serwisów, na których wyszukujemy książki, ma zaimplementowanego zna
 a następnie z każdej podstrony zbudować jednolity rezultat oferty. Listę ofert oddaje koordynatorowi. Do pobierania stron każdy ze znajdowaczy korzysta z pobieracza.
 
 \subsection{Pobieracz (\ang{Downloader})}
-Zadanie pobieracza to rozdzielanie żądań pobierania między dostępnych workerów, z których każdy pobiera stronę o podanym adresie URL.
+Zadanie pobieracza to rozdzielanie żądań pobierania między dostępnych pracowników (\ang{worker}), z których każdy pobiera stronę o podanym adresie URL.
 
 \subsection{Dopasowywacz (\ang{Matcher})}
 Dopasowywacz potrafi pogrupować otrzymane ze wszystkich serwisów oferty, tak aby móc je porównać i zaprezentować użytkownikowi.
 Korzysta w tym celu z algorytmu {\itshape k-medoid}, który zostanie opisany poniżej.
 
 \section{Dopasowywanie ofert}
+Dopasowywanie ofert wymagało od nas użycia metod z zakresu przetwarzania tekstu oraz eksploracji danych tekstowych.
 
 \subsection{Przygotowanie danych}
+Pierwszym krokiem dopasowania było przygotowanie danych. Na początku z opisu
+zostały przekształcone na wektory słów. Wszystkie znaki białe oraz znaki
+przestankowe zostały zignorowane. Następnie zastosowana została lista słów stopu,
+która zawierała słowa nieistotne takie jak łączniki zdań. Bazą dla naszej listy
+była lista słów stopu Wikipedii. Tak przefiltrowany wektor mógł być przekazany
+do następnego etapu.
 
 \subsection{Algorytm k-medoid}
+
 
 \subsection{Miara odległości}
 \TODO{opis cachowania}
 
 \subsubsection{N-gramy}
+N-gramy to n-elementowe ciągi kolejnych słów z rozpatrywanego wektora. Dzięki
+analizie ciągów a nie tylko pojedynczych słów, pod uwagę brana jest również
+zależność między wyrazami. Następnie porównuje się występowanie poszczególnych
+n-gramów w przetwarzanych dokumentach. Dokumenty, które mają najwięcej wspólnych
+n-gramów należą do tej samej grupy.
 
 \subsubsection{Miara kosinusowa i~TFIDF}
+
 
 \subsection{Wybór liczby grup}
 
@@ -122,6 +158,26 @@ Dopiero tak zmodyfikowana miara sylwetki przyniosła pewną poprawę.
 \TODO{A jakie wyniki tu wrzucamy?}
 
 \section{Podsumowanie}
-\TODO{A tu to już wogóle nie wiem co napisać...}
+Systemy agentowe to bardzo ciekawe podejście do projektowania i implementacji
+aplikacji rozproszonych. Pozwala ono na łatwe i skuteczne zarządzanie aplikacją
+rozlokowaną na różnych maszynach. Framework Akka doskonale spisuje się w roli
+frameworka do zastosowań agentowych, umożliwia zastosowanie bardziej
+zaawansowanych technik interakcji z agentami, takich jak zastosowany przez nas
+routing.
+
+Mamy jednak kilka zastrzeżeń do języka Scala. Język ten sam w sobie
+jest doskonałym narzędziem do pracy, jednak część jego mechanizmów zamiast
+założonego przez twórców uproszczenia kodu, zdaje się jedynie go zaciemniać
+(przede wszystkim słowo kluczowe \verb+implicit+).
+Irytujący jest również czas kompilacji oraz o wiele gorsze wsparcie IDE niż
+w przypadku języka Java.
+
+Jeśli chodzi o część związaną z eksploracją tekstu, jedyny problem stanowiło
+dopasowywanie ofert, jednak po kilku próbach udało nam się znaleźć
+satsfakcjonujące rozwiązanie.
+
+Podsumowując, stworzyliśmy działającą, rozproszoną aplikację
+realizującą cel projektu. Dzięki temu nabyliśmy wiedzę, którą możemy wykorzystać
+nie tylko w projektach uczelnianych, ale również w pracy.
 
 \end{document}
