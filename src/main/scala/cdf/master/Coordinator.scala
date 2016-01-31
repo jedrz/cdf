@@ -31,6 +31,8 @@ class Coordinator(val query: String, replyTo: ActorRef) extends Actor with Actor
 
   override def preStart(): Unit = {
     finders.foreach(_ ! Finder.Find(query))
+    // TODO: Schedule a timeout event if waiting for offers from a finder takes too long time.
+    // And send all collected offers to matcher if timeout occurs.
   }
 
   override def receive: Receive = {

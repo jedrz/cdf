@@ -31,7 +31,6 @@ class KWFinderUtil extends FinderUtil {
     val document = browser.parseString(source)
     val aElements: List[Element] = document >> elementList(searchResultSelector)
     val linksToBooks = aElements.map("https://ksiegarniawarszawa.pl" + _.attr("href"))
-    println("aaa: " + linksToBooks.head)
     linksToBooks
   }
 

@@ -1,5 +1,8 @@
 package cdf.matcher.distance
 
-trait DistanceMeasure {
-  def apply(words1: Vector[String], words2: Vector[String]): Double
+trait DistanceMeasure[T] {
+  /**
+    * The smaller absolute value returned, the better clustering is.
+    */
+  def apply(v1: T, v2: T): Double
 }

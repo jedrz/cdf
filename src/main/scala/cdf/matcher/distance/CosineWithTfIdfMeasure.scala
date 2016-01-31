@@ -1,6 +1,6 @@
 package cdf.matcher.distance
 
-class CosineWithTfIdfMeasure(val documents: Vector[Map[String, Int]]) extends DistanceMeasure {
+class CosineWithTfIdfMeasure(val documents: Vector[Map[String, Int]]) extends DistanceMeasure[Vector[String]] {
 
   override def apply(words1: Vector[String], words2: Vector[String]): Double = {
     val tfIdf1 = tfidf(words1)

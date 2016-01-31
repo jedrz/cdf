@@ -6,7 +6,7 @@ trait NGramsMeasureComponent {
   val nGramsEvaluator: NGramsEvaluator
 }
 
-class NGramsMeasure extends DistanceMeasure {
+class NGramsMeasure extends DistanceMeasure[Vector[String]] {
   this: NGramsMeasureComponent =>
 
   override def apply(words1: Vector[String], words2: Vector[String]): Double = {
