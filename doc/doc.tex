@@ -8,6 +8,7 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows,positioning,automata}
 \tikzset{>=stealth',shorten >=1pt,auto,thick,main node/.style={rectangle,fill=blue!30,draw,minimum size=0.8cm,inner sep=10pt,font=\sffamily\large\bfseries},edge/.style={thick,double}}
+\usepackage{enumitem}
 
 \newcommand{\TODO}[1]{\textcolor{blue}{TODO: #1 \\}}
 \newcommand{\ang}[1]{ang.~{\itshape #1}}
@@ -82,9 +83,38 @@ do następnego etapu.
 
 \subsection{Algorytm k-medoid}
 
+Zaimplementowanym algorytmem do~grupowania danych jest \emph{k-medoid}. Jest
+on~podobny do~algorytmu k-średnich, jednak punkty wyznaczające grupy
+(\emph{medoidy}) są~przykładami ze~zbioru danych. Pozwala to~na~uniknięcie
+konieczności określenia sposobu w~jaki można stworzyć pośrednie punkty
+wyznaczające centra (w~naszym przypadku wektory wyrazów).
+
+Algorytm działa następująco:
+
+\begin{enumerate}
+\item Wylosuj $k$ przykładów, które będą medoidami. $k$ to~pożądana liczba
+  grup.
+\item Dopóki suma odległości do~medoid maleje i~nie osiągnięto liczby
+  zadanych iteracji:
+\begin{enumerate}[label*=\arabic*.]
+\item Dla każdego medoida i~dla każdego przykładu:
+\begin{enumerate}[label*=\arabic*.]
+\item Zamień bieżącego medoida na~aktualny przykład.
+\item Oblicz sumę odległości do~medoid.
+\item Jeśli się zwiększyła, wycofaj zamianę.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+Algorytm do~porównywania podobieństwa przykładów wykorzystuje miarę odległości.
+Dwie z~nich opisaliśmy w~kolejnej sekcji.
+
+Podczas badania zachowania algorytmu zauważyliśmy, że~oblicza on~miary
+odległości dla par przykładów wielokrotnie. Wobec tego dodaliśmy zapamiętywanie
+wyników miary odległości dla każdego wywołania. Przyspieszyło to~proces
+grupowania aż~kilkanaście razy.
 
 \subsection{Miara odległości}
-\TODO{opis cachowania}
 
 \subsubsection{N-gramy}
 N-gramy to n-elementowe ciągi kolejnych słów z rozpatrywanego wektora. Dzięki
