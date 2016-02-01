@@ -13,6 +13,9 @@
 \newcommand{\TODO}[1]{\textcolor{blue}{TODO: #1 \\}}
 \newcommand{\ang}[1]{ang.~{\itshape #1}}
 
+% http://tex.stackexchange.com/questions/83440/inputenc-error-unicode-char-u8-not-set-up-for-use-with-latex
+\DeclareUnicodeCharacter{00A0}{~}
+
 \begin{document}
 
 \title{Cebula Deal Finder\\%
@@ -55,6 +58,8 @@ Poniższe sekcje opisują stworzonych przez nas aktorów oraz interakcje między
 Od tego aktora rozpoczyna się interakcja użytkownika z aplikacją. Jego zadaniem jest przyjęcie tytułu do wyszukiwania i przekazanie pracy nowemu koordynatorowi,
 a także odbiór wyników pracy od koordynatora i ich prezentacja.
 
+Nowy koordynator tworzony jest per tytuł do wyszukania.
+
 \subsection{Koordynator (\ang{Coordinator})}
 Koordynator tworzony jest per wyszukiwany przez użytkownika tytuł. Do jego obowiązków należy przekazanie tytułu do wyszukiwania poszczególnym znajdowaczom,
 zebranie wyników od wszystkich znajdowaczy, przekazanie ofert do dopasowania do dopasowywacza i, finalnie, zwrócenie pogrupowanych pozycji do mastera.
@@ -65,6 +70,8 @@ a następnie z każdej podstrony zbudować jednolity rezultat oferty. Listę ofe
 
 \subsection{Pobieracz (\ang{Downloader})}
 Zadanie pobieracza to rozdzielanie żądań pobierania między dostępnych pracowników (\ang{worker}), z których każdy pobiera stronę o podanym adresie URL.
+Pobieracz jest tylko jeden na całą aplikację i kontroluje on pulę pracowników pobierających konkretne strony. Pozwala to ograniczyć liczbę utrzymywanych połączeń HTTP.
+Liczbę pracowników ustawiliśmy na 5, jednak można ją zmienić w zależności od potrzeb użytkownika.
 
 \subsection{Dopasowywacz (\ang{Matcher})}
 Dopasowywacz potrafi pogrupować otrzymane ze wszystkich serwisów oferty, tak aby móc je porównać i zaprezentować użytkownikowi.
