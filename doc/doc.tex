@@ -197,8 +197,70 @@ przykładów w~jego grupie, w~poniższy sposób:
 
 Dopiero tak zmodyfikowana miara sylwetki przyniosła pewną poprawę.
 
-\section{Wyniki}
-\TODO{A jakie wyniki tu wrzucamy?}
+\section{Demonstracja działania}
+
+Poniższy wycinek logów pokazuje działanie programu i~końcowy rezultat dla
+zapytania ,,pustynna włócznia''.
+
+\scriptsize
+\begin{verbatim}
+[info] Running cdf.main.Main pustynna włócznia
+[.../master/coordinator1/empikFinder] Received pustynna włócznia query to search in Empik
+[.../master/coordinator1/matrasFinder] Received pustynna włócznia query to search in Matras
+[.../master/coordinator1/arosFinder] Received pustynna włócznia query to search in Aros
+[.../master/coordinator1/kwFinder] Received pustynna włócznia query to search in Księgarnia Warszawa
+[.../master/downloader] Received url http://aros.pl/szukaj/pustynna+włócznia/0 to download. Routing
+[.../master/downloader/downloadWorker3] Received url http://aros.pl/szukaj/pustynna+włócznia/0 to download
+[.../master/coordinator1/arosFinder] Found List(http://aros.pl/ksiazka/pustynna-wlocznia-ksiega-1-3, ...)
+[.../master/downloader] Received url http://aros.pl/ksiazka/pustynna-wlocznia-ksiega-1-3 to download. Routing
+[.../master/downloader/downloadWorker4] Received url https://ksiegarniawarszawa.pl/produkt/11894 to download
+[.../master/coordinator1] Received offers
+ Vector(Offer(http://aros.pl/ksiazka/pustynna-wlocznia-ksiega-1-3, Pustynna włócznia. Księga 1, ...), ...)
+[.../master/coordinator1] All received offers are
+...
+(5,Offer(http://aros.pl/ksiazka/pustynna-wlocznia-ksiega-1-3, Pustynna włócznia. Księga 1, Peter V. Brett, 29.13))
+...
+For k = 11 clustering is Vector(8, 8, ...) with overall distance = 10.072649533170214
+ and validation = 0.25774049370767016 for offers ...
+[.../master] Offers groups
+group 0
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/8272, Włócznia przeznaczenia, Arnaud Delalande, 8.19)
+group 1
+  0 Offer(http://aros.pl/ksiazka/pustynna-burza-scooby-doo-na-tropie-komiksow-14, ...)
+group 2
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/11894, Pustynna gorączka, Diana Palmer, 8.12)
+group 3
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/236520, Włócznia, Louis De Wohl, 39.9)
+group 4
+  0 Offer(http://aros.pl/ksiazka/maly-konstruktor---pustynna-burza-goliath-alex, ...)
+  1 Offer(http://aros.pl/ksiazka/maly-konstruktor---pustynna-burza-hunter-alex, ...)
+  2 Offer(http://aros.pl/ksiazka/maly-konstruktor---pustynna-burza-cobra-alex, ...)
+group 5
+  0 Offer(http://aros.pl/ksiazka/pustynna-wojna-rommla, Pustynna wojna Rommla, Kitchen Martin, 34.3)
+  1 Offer(https://ksiegarniawarszawa.pl/produkt/248713, Pustynna wojna Rommla. II wojna światowa w ...)
+  2 Offer(http://www.matras.pl/pustynna-wojna-rommla-ii-wojna-swiatowa-w-afryce-polnocnej-1941-1943,p,203086 ...)
+group 6
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/112460, Pustynna odyseja, Harvey Lilley, 8.19)
+group 7
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/16591, Pustynna Włócznia. Księga 2, Peter V. Brett, 32.72)
+  1 Offer(https://ksiegarniawarszawa.pl/produkt/10178, Pustynna włócznia. Księga 2, Peter U.brett, 36.16)
+group 8
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/7078, Włócznia przeznaczenia, Craig Smith, 28.62)
+group 9
+  0 Offer(https://ksiegarniawarszawa.pl/produkt/17322, Pustynna włócznia. Księga 1, Peter U.brett, 28.62)
+  1 Offer(http://aros.pl/ksiazka/pustynna-wlocznia-ksiega-1-3, Pustynna włócznia. Księga 1, Peter V. Brett, 29.13)
+  2 Offer(https://ksiegarniawarszawa.pl/produkt/121000, Pustynna włócznia. Księga 1, Peter V. Brett, 32.72)
+  3 Offer(http://www.matras.pl/pustynna-wlocznia-ksiega-1,p,228819,
+          Pustynna włócznia. Księga 1, Peter V. Brett, 33.38)
+  4 Offer(http://www.empik.com/pustynna-wlocznia-ksiega-1-brett-peter-v,prod57795561,ksiazka-p,
+          Pustynna włócznia. Księga 1, Brett Peter V., 35.99)
+group 10
+  0 Offer(http://www.matras.pl/pustynna-burza-pierwsza-wojna-nad-zatoka-perska-1991,p,223873, ...)
+\end{verbatim}
+\normalsize
+
+Jak widać, pogrupowanie wyników wyszukiwania dla tego przykładu jest w~zasadzie
+bezbłędne.
 
 \section{Podsumowanie}
 Systemy agentowe to bardzo ciekawe podejście do projektowania i implementacji
